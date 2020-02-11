@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <meta charset="utf-8">
+    <title>Remill Lift</title>
+    <style>
+        * {
+            font-family: monospace;
+        }
+        html, body {
+            margin: 0px;
+            padding: 5px;
+            width: calc(100% - 10px);
+            height: calc(100% - 10px);
+        }
+        textarea {
+            padding: 0px;
+            width: 100%;
+            height: 45%;
+        }
+    </style>
+</head>
+
+<body>
+    x86 Hex (32 bit for now):<br>
+    <textarea id="hex" spellcheck="false">554889e5c745fc03000000c745f8050000008b45fc0345f85dc3</textarea><br>
+    Output LLVM:<br>
+    <textarea id="output" style="white-space: nowrap; overflow: auto;" spellcheck="false"></textarea><br>
+    <button id="lift" disabled>Loading...</button>
+    <script>
+        var Module = {
+          onRuntimeInitialized: function() {
+            const hex = document.getElementById("hex");
+            const button = document.getElementById("lift");
+            button.disabled = false;
+            button.innerText = "Lift x86 to LLVM";
+            button.onclick = () => {
+                button.innerText = "Processing...";
+                button.disabled = true;
+                hex.disabled = true;
+                setTimeout(() => {
+                    Module.Lift(
+                        hex.value,
+                        0,
+                        0,
+                        "",
+                        "",
+                        "/out.ll",
+                        "");
+                    document.getElementById("output").value = Module.FS.readFile("/out.ll", { encoding: "utf8" });
+                    Module.FS.unlink("/out.ll");
+                    button.innerText = "Refresh to re-run";
+                })
+            };
+          }
+        };
+    </script>
+    <script src="wemu.js"></script>
+</body>
+</html>
